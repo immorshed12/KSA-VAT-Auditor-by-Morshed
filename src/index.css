@@ -1,0 +1,37 @@
+@import "tailwindcss";
+
+@theme {
+  --color-slate-950: #020617;
+}
+
+@layer utilities {
+  @media print {
+    body {
+      background: white !important;
+      font-size: 10pt;
+      margin: 0;
+      padding: 0;
+    }
+    @page {
+      margin: 1cm;
+    }
+  }
+}
+
+body {
+  background-color: #f8fafc;
+  background-image: 
+    radial-gradient(at 0% 0%, hsla(210,100%,98%,1) 0, transparent 50%), 
+    radial-gradient(at 50% 0%, hsla(210,100%,96%,1) 0, transparent 50%), 
+    radial-gradient(at 100% 0%, hsla(210,100%,98%,1) 0, transparent 50%);
+  min-height: 100vh;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}

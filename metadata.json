@@ -1,0 +1,6 @@
+{
+  "name": "KSA VAT Auditor",
+  "description": "A specialized ZATCA-aligned VAT auditing and return reconciliation suite for Saudi Arabia, featuring 15% rate calculations and audit comparison tools.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

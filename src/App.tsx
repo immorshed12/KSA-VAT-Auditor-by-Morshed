@@ -315,14 +315,14 @@ export default function App() {
         reader.readAsDataURL(file);
         const base64Data = await base64Promise;
 
-        const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+        const apiKey = process.env.GEMINI_API_KEY || (import.meta as any).env.VITE_GEMINI_API_KEY;
         if (!apiKey || apiKey === "undefined" || apiKey === "" || apiKey === "UNDEFINED" || apiKey === "null") {
           throw new Error("API_KEY_MISSING");
         }
 
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
-          model: "gemini-1.5-flash",
+          model: "gemini-3-flash-preview",
           contents: {
             parts: [
               {
@@ -333,41 +333,41 @@ export default function App() {
               },
               {
                 text: `You are an expert KSA VAT Auditor specialized in ZATCA (GAZT) bilingual tax returns. 
-                Extract the following data from the provided VAT Return PDF. 
+                Extract ALL data fields from the provided VAT Return PDF. 
                 
                 The form has two main sections:
-                SECTION 1: VAT ON SALES (Items 1-6)
-                SECTION 2: VAT ON PURCHASES (Items 7-12)
+                1. VAT ON SALES (Items 1-6)
+                2. VAT ON PURCHASES (Items 7-12)
                 
-                Extract:
-                - companyName: The name of the taxpayer/company (Arabic or English).
-                - taxNumber: The 15-digit VAT registration number.
+                Extract Metadata:
+                - companyName: The name of the taxpayer/company.
+                - taxNumber: The 15-digit VAT registration number (رقم التسجيل الضريبي).
                 - quarter: The tax period (e.g. Quarter 4, 2024).
                 - fromDate: Start date of period (DD-MM-YYYY).
                 - toDate: End date of period (DD-MM-YYYY).
                 
-                Sales Table (Table items 1-6):
-                - salesVatAmount: Amount from "Standard rated sales at 15%" (item 1).
-                - salesVatAdjustment: Adjustment from "Standard rated sales at 15%" (item 1).
-                - salesZeroAmount: Amount from "Zero rated domestic sales" or "Exports" (items 3-4).
-                - salesZeroAdjustment: Adjustment from items 3-4.
-                - salesExemptAmount: Amount from "Exempt sales" (item 5).
-                - salesExemptAdjustment: Adjustment from item 5.
+                Extract Sales Section (Items 1-6):
+                - salesVatAmount: "Standard rated sales at 15%" -> Amount (SAR) column.
+                - salesVatAdjustment: "Standard rated sales at 15%" -> Adjustment (SAR) column.
+                - salesZeroAmount: "Zero rated domestic sales" + "Exports" -> Amount (SAR).
+                - salesZeroAdjustment: "Zero rated domestic sales" + "Exports" -> Adjustment (SAR).
+                - salesExemptAmount: "Exempt sales" -> Amount (SAR).
+                - salesExemptAdjustment: "Exempt sales" -> Adjustment (SAR).
                 
-                Purchases Table (Table items 7-12):
-                - purchaseVatAmount: Sum of amounts from "Standard rated domestic purchases at 15%" and any Imports (items 7-9).
-                - purchaseVatAdjustment: Sum of adjustments from items 7-9.
-                - purchaseZeroAmount: Amount from "Zero rated purchases" (item 10).
-                - purchaseZeroAdjustment: Adjustment from item 10.
-                - purchaseExemptAmount: Amount from "Exempt purchases" (item 11).
-                - purchaseExemptAdjustment: Adjustment from item 11.
+                Extract Purchases Section (Items 7-12):
+                - purchaseVatAmount: Sum of "Standard rated domestic purchases at 15%" + "Imports subject to VAT paid at customs" + "Imports subject to VAT accounted for through reverse charge mechanism" -> Amount (SAR).
+                - purchaseVatAdjustment: Sum of adjustments for items 7, 8, and 9 -> Adjustment (SAR).
+                - purchaseZeroAmount: "Zero rated purchases" -> Amount (SAR).
+                - purchaseZeroAdjustment: "Zero rated purchases" -> Adjustment (SAR).
+                - purchaseExemptAmount: "Exempt purchases" -> Amount (SAR).
+                - purchaseExemptAdjustment: "Exempt purchases" -> Adjustment (SAR).
                 
-                Others:
-                - journalVat: Any "VAT Paid" or manual journal adjustments.
-                - vatCreditCarried: "VAT Credit carried forward from previous period".
-                - corrections: Total of "Corrections from previous period".
+                Extract Adjustments:
+                - journalVat: "Tax payments in manual journal entries" or similar VAT Paid adjustments.
+                - vatCreditCarried: "VAT Credit carried forward from previous period" (رصيد ضريبة القيمة المضافة المرحل).
+                - corrections: "Net corrections from previous period" (صافي التصحيحات).
                 
-                Return exactly this JSON structure. Convert all SAR values to numbers. If a value is missing or 0.00, return 0.`
+                Return exactly this JSON structure. Convert all SAR values to numbers. If a value is missing, return 0.`
               }
             ]
           },

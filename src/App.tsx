@@ -332,25 +332,89 @@ export default function App() {
                 }
               },
               {
-                text: `You are an expert KSA VAT Auditor. Carefully extract data from this Official KSA VAT Return PDF. 
-                Extract: companyName, taxNumber, quarter, fromDate, toDate, and all table amounts (Sales Standard/Zero/Exempt, Purchase Standard/Zero/Exempt, Manual Journal VAT Paid, Credit Carried, Corrections). 
-                Return exactly this JSON structure: { "companyName": "...", "taxNumber": "...", "quarter": "...", "fromDate": "...", "toDate": "...", "salesVatAmount": 0, ... }`
+                text: `You are an expert KSA VAT Auditor specialized in ZATCA (GAZT) bilingual tax returns. 
+                Carefully analyze the provided Official VAT Return PDF (Arabic and English).
+                
+                Extract precisely:
+                1. Metadata:
+                   - companyName (اسم المكلف)
+                   - taxNumber (رقم التسجيل الضريبي - 15 digits)
+                   - quarter (الفترة الضريبية)
+                   - fromDate (من تاريخ)
+                   - toDate (إلى تاريخ)
+                
+                2. VAT on Sales (VAT ON SALES / ضريبة القيمة المضافة على المبيعات):
+                   - Standard rated sales at 15% (المبيعات الخاضعة للنسبة الأساسية ١٥%): Extract 'Amount (SAR)' as salesVatAmount and 'Adjustment (SAR)' as salesVatAdjustment.
+                   - Zero rated domestic sales (المبيعات المحلية الخاضعة لنسبة الصفر): Extract 'Amount (SAR)' as salesZeroAmount and 'Adjustment (SAR)' as salesZeroAdjustment.
+                   - Exempt sales (المبيعات المعفاة): Extract 'Amount (SAR)' as salesExemptAmount and 'Adjustment (SAR)' as salesExemptAdjustment.
+                
+                3. VAT on Purchases (VAT ON PURCHASES / ضريبة القيمة المضافة على المشتريات):
+                   - Standard rated domestic purchases (المشتريات المحلية بالضريبة الأساسية): Extract 'Amount (SAR)' as purchaseVatAmount and 'Adjustment (SAR)' as purchaseVatAdjustment.
+                   - Zero rated domestic purchases (المشتريات المحلية بالضريبة الصفرية): Extract 'Amount (SAR)' as purchaseZeroAmount and 'Adjustment (SAR)' as purchaseZeroAdjustment.
+                   - Exempt domestic purchases (المشتريات المحلية المعفاة): Extract 'Amount (SAR)' as purchaseExemptAmount and 'Adjustment (SAR)' as purchaseExemptAdjustment.
+                
+                4. Other:
+                   - Tax payments in manual journal entries (ضريبة القيمة المضافة المدفوعة في قيود اليومية): Extract as journalVat.
+                   - VAT Credit carried forward from previous period (রصيد ضريبة القيمة المضافة المرحل من الفترة السابقة): Extract as vatCreditCarried.
+                   - Net corrections from previous period (صافي التصحيحات من الفترات السابقة): Extract as corrections.
+                
+                CRITICAL:
+                - If a value is 0.00 or not found, use 0.
+                - Strip SAR and commas.
+                - ZATCA forms often list Sales (Items 1-6) first, then Purchases (Items 7-12). Check both.`
               }
             ]
           },
           config: {
-            responseMimeType: "application/json"
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                companyName: { type: Type.STRING },
+                taxNumber: { type: Type.STRING },
+                quarter: { type: Type.STRING },
+                fromDate: { type: Type.STRING },
+                toDate: { type: Type.STRING },
+                
+                salesVatAmount: { type: Type.NUMBER },
+                salesVatAdjustment: { type: Type.NUMBER },
+                salesZeroAmount: { type: Type.NUMBER },
+                salesZeroAdjustment: { type: Type.NUMBER },
+                salesExemptAmount: { type: Type.NUMBER },
+                salesExemptAdjustment: { type: Type.NUMBER },
+                
+                purchaseVatAmount: { type: Type.NUMBER },
+                purchaseVatAdjustment: { type: Type.NUMBER },
+                purchaseZeroAmount: { type: Type.NUMBER },
+                purchaseZeroAdjustment: { type: Type.NUMBER },
+                purchaseExemptAmount: { type: Type.NUMBER },
+                purchaseExemptAdjustment: { type: Type.NUMBER },
+                
+                journalVat: { type: Type.NUMBER },
+                vatCreditCarried: { type: Type.NUMBER },
+                corrections: { type: Type.NUMBER },
+              },
+              required: [
+                "companyName", "taxNumber"
+              ]
+            }
           }
         });
 
-        let responseText = response.text || "";
-        if (responseText.includes("```json")) {
-          responseText = responseText.split("```json")[1].split("```")[0].trim();
-        } else if (responseText.includes("```")) {
-          responseText = responseText.split("```")[1].split("```")[0].trim();
-        }
+        let responseText = response.text || "{}";
+        // Clean up markdown if present
+        responseText = responseText.replace(/```json\n?|```/g, "").trim();
         
-        const parsed = JSON.parse(responseText.trim());
+        const parsed = JSON.parse(responseText);
+
+        const getNum = (val: any) => {
+          if (typeof val === 'number') return val;
+          if (typeof val === 'string') {
+            const n = parseFloat(val.replace(/,/g, ''));
+            return isNaN(n) ? 0 : n;
+          }
+          return 0;
+        };
 
         setData(prev => ({
           ...prev,
@@ -360,23 +424,23 @@ export default function App() {
           fromDate: parsed.fromDate || prev.fromDate,
           toDate: parsed.toDate || prev.toDate,
           
-          salesVatAmount: parsed.salesVatAmount || 0,
-          salesVatAdjustment: parsed.salesVatAdjustment || 0,
-          salesZeroAmount: parsed.salesZeroAmount || 0,
-          salesZeroAdjustment: parsed.salesZeroAdjustment || 0,
-          salesExemptAmount: parsed.salesExemptAmount || 0,
-          salesExemptAdjustment: parsed.salesExemptAdjustment || 0,
+          salesVatAmount: getNum(parsed.salesVatAmount),
+          salesVatAdjustment: getNum(parsed.salesVatAdjustment),
+          salesZeroAmount: getNum(parsed.salesZeroAmount),
+          salesZeroAdjustment: getNum(parsed.salesZeroAdjustment),
+          salesExemptAmount: getNum(parsed.salesExemptAmount),
+          salesExemptAdjustment: getNum(parsed.salesExemptAdjustment),
           
-          purchaseVatAmount: parsed.purchaseVatAmount || 0,
-          purchaseVatAdjustment: parsed.purchaseVatAdjustment || 0,
-          purchaseZeroAmount: parsed.purchaseZeroAmount || 0,
-          purchaseZeroAdjustment: parsed.purchaseZeroAdjustment || 0,
-          purchaseExemptAmount: parsed.purchaseExemptAmount || 0,
-          purchaseExemptAdjustment: parsed.purchaseExemptAdjustment || 0,
+          purchaseVatAmount: getNum(parsed.purchaseVatAmount),
+          purchaseVatAdjustment: getNum(parsed.purchaseVatAdjustment),
+          purchaseZeroAmount: getNum(parsed.purchaseZeroAmount),
+          purchaseZeroAdjustment: getNum(parsed.purchaseZeroAdjustment),
+          purchaseExemptAmount: getNum(parsed.purchaseExemptAmount),
+          purchaseExemptAdjustment: getNum(parsed.purchaseExemptAdjustment),
           
-          journalVatAmount: parsed.journalVat || 0,
-          vatCreditCarried: parsed.vatCreditCarried || 0,
-          corrections: parsed.corrections || 0,
+          journalVatAmount: getNum(parsed.journalVat),
+          vatCreditCarried: getNum(parsed.vatCreditCarried),
+          corrections: getNum(parsed.corrections),
         }));
         setActiveTab('overview');
 
@@ -443,7 +507,7 @@ export default function App() {
         <div className="flex justify-between items-start mb-12 border-b-2 border-slate-900 pb-8">
           <div>
             <h1 className="text-3xl font-black uppercase tracking-tighter mb-2">KSA VAT Audit Report</h1>
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest leading-none">Powered by ZATCA Compliance Suite</p>
+            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest leading-none">Professional VAT Audit Tool</p>
           </div>
           <div className="text-right">
             <p className="text-lg font-bold">{data.companyName || 'N/A'}</p>

@@ -315,7 +315,12 @@ export default function App() {
         reader.readAsDataURL(file);
         const base64Data = await base64Promise;
 
-        const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey || apiKey === "undefined" || apiKey === "" || apiKey === "UNDEFINED") {
+          throw new Error("API_KEY_MISSING");
+        }
+
+        const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
           model: "gemini-3-flash-preview",
           contents: {
@@ -327,63 +332,25 @@ export default function App() {
                 }
               },
               {
-                text: `Extract VAT return data from this tax return document exactly as structured in the tables.
-                
-                Identify Header Info: companyName, taxNumber, quarter, fromDate, toDate.
-                
-                Extract Sales Table Data:
-                - VAT Row: amount (Sales), adjustment (Credit notes)
-                - Zero Tax Row: amount, adjustment
-                - Tax Exempt Row: amount, adjustment
-                
-                Extract Purchase Table Data:
-                - VAT Row: amount (Purchases), adjustment (Debit notes)
-                - Zero Tax Row: amount, adjustment
-                - Tax Exempt Row: amount, adjustment
-                - Manual Journal Row: VAT Paid adjustment/amount (The 15% VAT record)
-                
-                Summary Section:
-                - VAT Credit carried from previous period
-                - Corrections for previous period
-                
-                Return strictly as JSON.`
+                text: `You are an expert KSA VAT Auditor. Carefully extract data from this Official KSA VAT Return PDF. 
+                Extract: companyName, taxNumber, quarter, fromDate, toDate, and all table amounts (Sales Standard/Zero/Exempt, Purchase Standard/Zero/Exempt, Manual Journal VAT Paid, Credit Carried, Corrections). 
+                Return exactly this JSON structure: { "companyName": "...", "taxNumber": "...", "quarter": "...", "fromDate": "...", "toDate": "...", "salesVatAmount": 0, ... }`
               }
             ]
           },
           config: {
-            responseMimeType: "application/json",
-            responseSchema: {
-              type: Type.OBJECT,
-              properties: {
-                companyName: { type: Type.STRING },
-                taxNumber: { type: Type.STRING },
-                quarter: { type: Type.STRING },
-                fromDate: { type: Type.STRING },
-                toDate: { type: Type.STRING },
-                
-                salesVatAmount: { type: Type.NUMBER },
-                salesVatAdjustment: { type: Type.NUMBER },
-                salesZeroAmount: { type: Type.NUMBER },
-                salesZeroAdjustment: { type: Type.NUMBER },
-                salesExemptAmount: { type: Type.NUMBER },
-                salesExemptAdjustment: { type: Type.NUMBER },
-                
-                purchaseVatAmount: { type: Type.NUMBER },
-                purchaseVatAdjustment: { type: Type.NUMBER },
-                purchaseZeroAmount: { type: Type.NUMBER },
-                purchaseZeroAdjustment: { type: Type.NUMBER },
-                purchaseExemptAmount: { type: Type.NUMBER },
-                purchaseExemptAdjustment: { type: Type.NUMBER },
-                
-                journalVat: { type: Type.NUMBER },
-                vatCreditCarried: { type: Type.NUMBER },
-                corrections: { type: Type.NUMBER },
-              }
-            }
+            responseMimeType: "application/json"
           }
         });
 
-        const parsed = JSON.parse(response.text);
+        let responseText = response.text || "";
+        if (responseText.includes("```json")) {
+          responseText = responseText.split("```json")[1].split("```")[0].trim();
+        } else if (responseText.includes("```")) {
+          responseText = responseText.split("```")[1].split("```")[0].trim();
+        }
+        
+        const parsed = JSON.parse(responseText.trim());
 
         setData(prev => ({
           ...prev,
@@ -423,10 +390,19 @@ export default function App() {
         }
 
         console.error("PDF Extraction Error:", error);
-        setErrorMsg(isQuotaError
-          ? "The AI service is currently at maximum capacity. Please wait a moment and try again." 
-          : "Failed to extract data. Ensure the PDF is a valid tax document."
-        );
+        
+        if (error?.message?.includes("API_KEY_MISSING")) {
+          setErrorMsg("API Key Missing: Please go to Repository Settings > Secrets and add 'GEMINI_API_KEY'.");
+        } else if (error?.message?.includes("API key not valid")) {
+          setErrorMsg("Invalid API Key: The key you provided is not valid for Gemini API.");
+        } else if (error?.message?.includes("model") && error?.message?.includes("not found")) {
+          setErrorMsg("AI Model Error: The requested model is not available. Please try again later.");
+        } else {
+          setErrorMsg(isQuotaError
+            ? "The AI service is currently at maximum capacity. Please wait a moment and try again." 
+            : "Failed to extract data. Ensure the PDF is a valid ZATCA tax document."
+          );
+        }
       } finally {
         setIsParsing(false);
         if (fileInputRef.current) fileInputRef.current.value = '';

@@ -315,8 +315,8 @@ export default function App() {
         reader.readAsDataURL(file);
         const base64Data = await base64Promise;
 
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey || apiKey === "undefined" || apiKey === "" || apiKey === "UNDEFINED") {
+        const apiKey = process.env.GEMINI_API_KEY || import.meta.env.VITE_GEMINI_API_KEY;
+        if (!apiKey || apiKey === "undefined" || apiKey === "" || apiKey === "UNDEFINED" || apiKey === "null") {
           throw new Error("API_KEY_MISSING");
         }
 
@@ -398,9 +398,11 @@ export default function App() {
         } else if (error?.message?.includes("model") && error?.message?.includes("not found")) {
           setErrorMsg("AI Model Error: The requested model is not available. Please try again later.");
         } else {
+          // If it's a JSON parse error or something else, show a hint
+          const details = error?.message ? `: ${error.message}` : "";
           setErrorMsg(isQuotaError
             ? "The AI service is currently at maximum capacity. Please wait a moment and try again." 
-            : "Failed to extract data. Ensure the PDF is a valid ZATCA tax document."
+            : `Failed to extract data${details}. Ensure the PDF is a valid ZATCA tax document.`
           );
         }
       } finally {

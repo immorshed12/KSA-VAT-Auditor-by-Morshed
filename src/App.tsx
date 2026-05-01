@@ -137,18 +137,18 @@ const calculateTotals = (data: TaxData) => {
 
 // --- Components ---
 const SectionHeader = ({ title, icon: Icon, colorClass }: { title: string, icon: any, colorClass: string }) => (
-  <div className="flex items-center gap-3 mb-6">
-    <div className={`p-2 rounded-lg ${colorClass}`}>
-      <Icon size={18} className="text-white" />
+  <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+    <div className={`p-1.5 sm:p-2 rounded-lg ${colorClass}`}>
+      <Icon size={16} className="text-white sm:w-[18px] sm:h-[18px]" />
     </div>
-    <h2 className="text-lg font-bold text-slate-800 tracking-tight">{title}</h2>
+    <h2 className="text-base sm:text-lg font-bold text-slate-800 tracking-tight">{title}</h2>
   </div>
 );
 
 const HeaderField = ({ label, icon: Icon, value, onChange, placeholder, type = "text" }: any) => (
-  <div className="flex flex-col gap-1.5">
-    <label className="text-[11px] font-semibold text-slate-500 flex items-center gap-2 ml-1">
-      <Icon size={14} className="text-slate-400" />
+  <div className="flex flex-col gap-1.5 w-full">
+    <label className="text-[10px] sm:text-[11px] font-semibold text-slate-500 flex items-center gap-2 ml-1">
+      <Icon size={12} className="text-slate-400 sm:w-[14px] sm:h-[14px]" />
       {label}
     </label>
     <input
@@ -156,7 +156,7 @@ const HeaderField = ({ label, icon: Icon, value, onChange, placeholder, type = "
       value={value || ''}
       onChange={(e) => onChange(e.target.value)}
       placeholder={placeholder}
-      className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
+      className="bg-white border border-slate-200 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-sm font-medium text-slate-700 placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all"
     />
   </div>
 );
@@ -168,8 +168,7 @@ const TableRow = ({
   taxAmount, 
   onAmountChange, 
   onAdjustmentChange,
-  isTotal = false,
-  readOnlyTax = false
+  isTotal = false
 }: { 
   label: string; 
   amount: number; 
@@ -178,39 +177,38 @@ const TableRow = ({
   onAmountChange?: (v: number) => void;
   onAdjustmentChange?: (v: number) => void;
   isTotal?: boolean;
-  readOnlyTax?: boolean;
 }) => (
   <tr className={`${isTotal ? 'bg-slate-50 font-bold border-t-2 border-slate-200' : 'hover:bg-slate-50/50'} border-b border-slate-100 transition-colors`}>
-    <td className={`py-4 px-4 text-sm ${isTotal ? 'text-slate-900' : 'text-slate-600'} font-medium`}>{label}</td>
-    <td className="py-4 px-4">
+    <td className={`py-4 px-3 sm:px-4 text-[13px] sm:text-sm ${isTotal ? 'text-slate-900' : 'text-slate-600'} font-semibold sm:font-medium`}>{label}</td>
+    <td className="py-4 px-2 sm:px-4">
       {onAmountChange ? (
         <input 
           type="number"
           value={amount === 0 ? '' : amount}
           onChange={(e) => onAmountChange(parseFloat(e.target.value) || 0)}
-          className="w-full text-right bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-2 py-1 text-sm font-mono"
+          className="w-full text-right bg-transparent focus:bg-white focus:ring-1 focus:ring-blue-500 rounded px-1 sm:px-2 py-1 text-[13px] sm:text-sm font-mono"
           placeholder="0.00"
         />
       ) : (
-        <div className="text-right text-sm font-mono">{amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
+        <div className="text-right text-[13px] sm:text-sm font-mono">{amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}</div>
       )}
     </td>
-    <td className="py-4 px-4">
+    <td className="py-4 px-2 sm:px-4">
       {onAdjustmentChange ? (
         <input 
           type="number"
           value={adjustment === 0 ? '' : adjustment}
           onChange={(e) => onAdjustmentChange(parseFloat(e.target.value) || 0)}
-          className="w-full text-right bg-transparent focus:bg-white focus:ring-1 focus:ring-red-500 rounded px-2 py-1 text-sm font-mono text-red-600"
+          className="w-full text-right bg-transparent focus:bg-white focus:ring-1 focus:ring-red-500 rounded px-1 sm:px-2 py-1 text-[13px] sm:text-sm font-mono text-red-600"
           placeholder="0.00"
         />
       ) : adjustment !== undefined ? (
-        <div className="text-right text-sm font-mono text-red-600">
+        <div className="text-right text-[13px] sm:text-sm font-mono text-red-600">
           {adjustment !== 0 ? "-" + Math.abs(adjustment).toLocaleString(undefined, { minimumFractionDigits: 2 }) : "-0.00"}
         </div>
       ) : null}
     </td>
-    <td className={`py-4 px-4 text-right text-sm font-mono font-bold ${isTotal ? 'text-slate-900' : 'text-blue-600'}`}>
+    <td className={`py-4 px-3 sm:px-4 text-right text-[13px] sm:text-sm font-mono font-bold ${isTotal ? 'text-slate-900' : 'text-blue-600'}`}>
       {taxAmount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
     </td>
   </tr>
@@ -635,27 +633,27 @@ export default function App() {
       <div className="max-w-4xl mx-auto min-h-screen flex flex-col bg-white md:shadow-2xl md:my-8 md:rounded-[2rem] md:border md:border-slate-200 overflow-hidden relative print:hidden">
         
         {/* Sticky Header */}
-        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 px-6 py-5 flex items-center justify-between print:hidden">
-          <div className="flex items-center gap-3">
-             <div className="p-2 bg-slate-900 rounded-lg">
-                <Calculator size={20} className="text-white" />
+        <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-slate-100 px-4 sm:px-6 py-4 sm:py-5 flex items-center justify-between print:hidden">
+          <div className="flex items-center gap-2 sm:gap-3">
+             <div className="p-1.5 sm:p-2 bg-slate-900 rounded-lg">
+                <Calculator size={18} className="text-white sm:w-[20px] sm:h-[20px]" />
              </div>
-             <h1 className="font-bold tracking-tight text-lg">KSA VAT Auditor</h1>
+             <h1 className="font-bold tracking-tight text-base sm:text-lg">VAT Auditor</h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2">
             <button 
               onClick={() => fileInputRef.current?.click()}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
               title="Import PDF"
             >
-              <Upload size={22} />
+              <Upload size={20} />
             </button>
             <button 
               onClick={clearAll}
               className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
               title="Reset"
             >
-              <Trash2 size={22} />
+              <Trash2 size={20} />
             </button>
           </div>
           <input type="file" accept=".pdf" className="hidden" ref={fileInputRef} onChange={handleFileUpload} />
@@ -675,24 +673,24 @@ export default function App() {
         </AnimatePresence>
 
         {/* Tab Navigation */}
-        <nav className="bg-white border-b border-slate-200 px-6 py-2 overflow-x-auto no-scrollbar flex gap-1">
+        <nav className="bg-white border-b border-slate-200 px-4 sm:px-6 py-2 overflow-x-auto no-scrollbar flex gap-1">
           {[
             { id: 'overview', icon: Building2, label: 'Overview' },
             { id: 'sales', icon: Plus, label: 'Sales' },
             { id: 'purchases', icon: Database, label: 'Purchases' },
-            { id: 'result', icon: CheckCircle2, label: 'Final Result' },
+            { id: 'result', icon: CheckCircle2, label: 'Result' },
             { id: 'compare', icon: GitCompare, label: 'Compare' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex-shrink-0 flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex-shrink-0 flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-[11px] sm:text-xs font-bold transition-all ${
                 activeTab === tab.id 
                 ? "bg-blue-50 text-blue-600" 
                 : "text-slate-400 hover:text-slate-600 hover:bg-slate-50"
               }`}
             >
-              <tab.icon size={14} />
+              <tab.icon size={13} className="sm:w-[14px] sm:h-[14px]" />
               {tab.label}
             </button>
           ))}
@@ -708,10 +706,10 @@ export default function App() {
                 className="space-y-6"
               >
                 <SectionHeader title="Entity Metadata" icon={Building2} colorClass="bg-slate-800" />
-                <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 space-y-5">
+                <div className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm border border-slate-200 space-y-4 sm:y-5">
                   <HeaderField label="Company Name" icon={Building2} value={data.companyName} onChange={(v: string) => setData({...data, companyName: v})} />
                   <HeaderField label="Tax Number / VAT ID" icon={Hash} value={data.taxNumber} onChange={(v: string) => setData({...data, taxNumber: v})} />
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <HeaderField label="Quarter" icon={FileText} value={data.quarter} onChange={(v: string) => setData({...data, quarter: v})} />
                     <HeaderField label="From Date" icon={Calendar} type="date" value={data.fromDate} onChange={(v: string) => setData({...data, fromDate: v})} />
                   </div>
@@ -733,14 +731,14 @@ export default function App() {
                        Sales Section
                     </h3>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[600px]">
+                  <div className="overflow-x-auto no-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[450px]">
                       <thead>
                         <tr className="bg-slate-50/30 border-b border-slate-200">
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase">Tax</th>
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Sales Amount</th>
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Adjustment</th>
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase text-right">VAT Due</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase">Tax</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Sales Amount</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Adjustment</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase text-right">VAT Due</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -797,14 +795,14 @@ export default function App() {
                        Purchases Section
                     </h3>
                   </div>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse min-w-[600px]">
+                  <div className="overflow-x-auto no-scrollbar">
+                    <table className="w-full text-left border-collapse min-w-[450px]">
                       <thead>
                         <tr className="bg-slate-50/30 border-b border-slate-200">
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase">Tax</th>
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Purchases Amount</th>
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Adjustment</th>
-                          <th className="py-3 px-4 text-[10px] font-bold text-slate-500 uppercase text-right">VAT Paid</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase">Tax</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Purchases Amount</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase text-right">Adjustment</th>
+                          <th className="py-3 px-3 sm:px-4 text-[10px] font-bold text-slate-500 uppercase text-right">VAT Paid</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -834,24 +832,24 @@ export default function App() {
                         />
                         {/* Manual Journal Row */}
                         <tr className="bg-blue-50/10 border-b border-slate-100 italic">
-                          <td className="py-4 px-4 text-xs font-bold text-blue-700">Tax payments in Manual Journal Entries</td>
-                          <td className="py-4 px-4 text-right">
+                          <td className="py-4 px-3 sm:px-4 text-[11px] sm:text-xs font-bold text-blue-700">Journal Entries VAT</td>
+                          <td className="py-4 px-2 sm:px-4 text-right">
                             <div className="flex flex-col items-end">
-                              <span className="text-[9px] text-slate-400 font-bold uppercase mb-0.5">Calculated Principal</span>
-                              <span className="text-sm font-mono font-bold text-slate-700">
+                              <span className="text-[8px] sm:text-[9px] text-slate-400 font-bold uppercase mb-0.5">Principal</span>
+                              <span className="text-[12px] sm:text-sm font-mono font-bold text-slate-700">
                                 {totals.journalPrincipal.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                               </span>
                             </div>
                           </td>
-                          <td className="py-4 px-4"></td>
-                          <td className="py-4 px-4 text-right">
+                          <td className="py-4 px-2 sm:px-4"></td>
+                          <td className="py-4 px-3 sm:px-4 text-right">
                              <div className="flex flex-col items-end">
-                              <span className="text-[9px] text-blue-400 font-bold uppercase mb-0.5">Edit VAT Amount</span>
+                              <span className="text-[8px] sm:text-[9px] text-blue-400 font-bold uppercase mb-0.5">Edit VAT</span>
                               <input 
                                 type="number" 
                                 value={data.journalVatAmount === 0 ? '' : data.journalVatAmount}
                                 onChange={(e) => setData({...data, journalVatAmount: parseFloat(e.target.value) || 0})}
-                                className="w-24 text-right bg-white border border-blue-200 focus:ring-1 focus:ring-blue-400 rounded px-2 py-1 text-sm font-mono font-bold text-blue-600"
+                                className="w-20 sm:w-24 text-right bg-white border border-blue-200 focus:ring-1 focus:ring-blue-400 rounded px-1 sm:px-2 py-1 text-[12px] sm:text-sm font-mono font-bold text-blue-600"
                               />
                             </div>
                           </td>
@@ -897,11 +895,11 @@ export default function App() {
               >
                 <SectionHeader title="Comparison Engine" icon={GitCompare} colorClass="bg-indigo-600" />
                 
-                <div className="bg-slate-900 rounded-3xl p-6 text-white shadow-2xl relative overflow-hidden">
-                   <div className="absolute top-0 right-0 p-8 opacity-10">
+                <div className="bg-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-6 text-white shadow-2xl relative overflow-hidden">
+                   <div className="absolute top-0 right-0 p-8 opacity-10 hidden sm:block">
                       <GitCompare size={120} />
                    </div>
-                   <div className="relative z-10">
+                   <div className="relative z-10 w-full">
                      <h3 className="text-lg font-bold mb-2">Compare Two Reports</h3>
                      <p className="text-slate-400 text-sm mb-6 max-w-sm">Select two saved drafts to see a side-by-side reconciliation of VAT figures.</p>
                      
@@ -938,18 +936,18 @@ export default function App() {
 
                 {compareIds?.[0] && compareIds?.[1] && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-                      <table className="w-full text-left text-sm">
+                    <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm overflow-x-auto no-scrollbar">
+                      <table className="w-full text-left text-sm min-w-[700px]">
                         <thead>
                           <tr className="bg-slate-50 border-b border-slate-200">
-                             <th className="py-4 px-6 font-black text-xs uppercase tracking-widest text-slate-400">Metric</th>
-                             <th className="py-4 px-6 font-bold text-right text-indigo-600">
-                               {compareIds[0] === 'current' ? 'Current' : drafts.find(d => d.id === compareIds[0])?.name}
+                             <th className="py-4 px-4 sm:px-6 font-black text-[10px] sm:text-xs uppercase tracking-widest text-slate-400">Metric</th>
+                             <th className="py-4 px-4 sm:px-6 font-bold text-right text-indigo-600">
+                               {compareIds[0] === 'current' ? 'A' : drafts.find(d => d.id === compareIds[0])?.name.substring(0, 15) + '...'}
                              </th>
-                             <th className="py-4 px-6 font-bold text-right text-purple-600">
-                               {compareIds[1] === 'current' ? 'Current' : drafts.find(d => d.id === compareIds[1])?.name}
+                             <th className="py-4 px-4 sm:px-6 font-bold text-right text-purple-600">
+                               {compareIds[1] === 'current' ? 'B' : drafts.find(d => d.id === compareIds[1])?.name.substring(0, 15) + '...'}
                              </th>
-                             <th className="py-4 px-6 font-bold text-right text-slate-900 border-l border-slate-100">Variance</th>
+                             <th className="py-4 px-4 sm:px-6 font-bold text-right text-slate-900 border-l border-slate-100">Variance</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -958,21 +956,52 @@ export default function App() {
                             const reportB = compareIds[1] === 'current' ? data : drafts.find(d => d.id === compareIds[1])!;
                             const totalsA = calculateTotals(reportA);
                             const totalsB = calculateTotals(reportB);
-
+ 
                             const metrics = [
-                              { label: 'Sales VAT Due', valA: totalsA.salesVatDue, valB: totalsB.salesVatDue },
-                              { label: 'Purchase VAT Paid', valA: totalsA.purchaseVatPaid, valB: totalsB.purchaseVatPaid },
+                              { label: 'SECTION: SALES', isHeader: true },
+                              { label: 'Std (15%) - Amt', valA: reportA.salesVatAmount, valB: reportB.salesVatAmount },
+                              { label: 'Std (15%) - Adj', valA: reportA.salesVatAdjustment, valB: reportB.salesVatAdjustment, isNegative: true },
+                              { label: 'Sales VAT Due', valA: totalsA.salesVatDue, valB: totalsB.salesVatDue, isBold: true },
+                              { label: 'Zero - Amt', valA: reportA.salesZeroAmount, valB: reportB.salesZeroAmount },
+                              { label: 'Zero - Adj', valA: reportA.salesZeroAdjustment, valB: reportB.salesZeroAdjustment, isNegative: true },
+                              { label: 'Exm - Amt', valA: reportA.salesExemptAmount, valB: reportB.salesExemptAmount },
+                              { label: 'Exm - Adj', valA: reportA.salesExemptAdjustment, valB: reportB.salesExemptAdjustment, isNegative: true },
+                              
+                              { label: 'SECTION: PURCHASES', isHeader: true },
+                              { label: 'Std (15%) - Amt', valA: reportA.purchaseVatAmount, valB: reportB.purchaseVatAmount },
+                              { label: 'Std (15%) - Adj', valA: reportA.purchaseVatAdjustment, valB: reportB.purchaseVatAdjustment, isNegative: true },
+                              { label: 'Purchase VAT Paid', valA: totalsA.purchaseVatPaid, valB: totalsB.purchaseVatPaid, isBold: true },
+                              { label: 'Zero - Amt', valA: reportA.purchaseZeroAmount, valB: reportB.purchaseZeroAmount },
+                              { label: 'Zero - Adj', valA: reportA.purchaseZeroAdjustment, valB: reportB.purchaseZeroAdjustment, isNegative: true },
+                              { label: 'Exm - Amt', valA: reportA.purchaseExemptAmount, valB: reportB.purchaseExemptAmount },
+                              { label: 'Exm - Adj', valA: reportA.purchaseExemptAdjustment, valB: reportB.purchaseExemptAdjustment, isNegative: true },
+                              { label: 'Journal VAT', valA: reportA.journalVatAmount, valB: reportB.journalVatAmount },
+ 
+                              { label: 'SECTION: FINAL RESULTS', isHeader: true },
+                              { label: 'VAT Credit B/F', valA: reportA.vatCreditCarried, valB: reportB.vatCreditCarried, isNegative: true },
+                              { label: 'Net Corrections', valA: reportA.corrections, valB: reportB.corrections },
+                              { label: 'Current Period VAT', valA: totalsA.currentVatDue, valB: totalsB.currentVatDue, isBold: true },
                               { label: 'Net VAT Due', valA: totalsA.netVatDue, valB: totalsB.netVatDue, isMain: true },
                             ];
-
-                            return metrics.map((m, idx) => {
+ 
+                            return metrics.map((m: any, idx) => {
+                              if (m.isHeader) {
+                                return (
+                                  <tr key={idx} className="bg-slate-100/50">
+                                    <td colSpan={4} className="py-2 px-4 sm:px-6 text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">{m.label}</td>
+                                  </tr>
+                                );
+                              }
                               const diff = m.valB - m.valA;
+                              const displayValA = m.isNegative ? -Math.abs(m.valA) : m.valA;
+                              const displayValB = m.isNegative ? -Math.abs(m.valB) : m.valB;
+ 
                               return (
-                                <tr key={idx} className={`border-b border-slate-100 ${m.isMain ? 'bg-slate-50 font-bold' : ''}`}>
-                                  <td className="py-4 px-6 text-slate-600">{m.label}</td>
-                                  <td className="py-4 px-6 text-right font-mono">{formatCurrency(m.valA)}</td>
-                                  <td className="py-4 px-6 text-right font-mono">{formatCurrency(m.valB)}</td>
-                                  <td className={`py-4 px-6 text-right font-mono border-l border-slate-100 ${diff === 0 ? 'text-slate-300' : diff > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                <tr key={idx} className={`border-b border-slate-100 ${m.isMain ? 'bg-indigo-50 font-bold' : m.isBold ? 'bg-slate-50 font-semibold' : ''}`}>
+                                  <td className="py-4 px-4 sm:px-6 text-slate-600 text-[13px]">{m.label}</td>
+                                  <td className={`py-4 px-4 sm:px-6 text-right font-mono text-[13px] ${m.isNegative && m.valA !== 0 ? 'text-red-500' : ''}`}>{formatCurrency(displayValA)}</td>
+                                  <td className={`py-4 px-4 sm:px-6 text-right font-mono text-[13px] ${m.isNegative && m.valB !== 0 ? 'text-red-500' : ''}`}>{formatCurrency(displayValB)}</td>
+                                  <td className={`py-4 px-4 sm:px-6 text-right font-mono text-[13px] border-l border-slate-100 ${diff === 0 ? 'text-slate-300' : diff > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                                     {diff > 0 ? '+' : ''}{formatCurrency(diff)}
                                   </td>
                                 </tr>
@@ -1045,36 +1074,36 @@ export default function App() {
                   <table className="w-full text-left">
                     <tbody>
                        <tr className="border-b border-slate-100 hover:bg-slate-50/50">
-                         <td className="py-5 px-6 text-sm font-semibold text-slate-700">Total VAT due of current period</td>
-                         <td className="py-5 px-6 text-right font-mono font-bold text-slate-900">{formatCurrency(totals.currentVatDue)}</td>
+                         <td className="py-5 px-4 sm:px-6 text-[13px] sm:text-sm font-semibold text-slate-700">Total VAT due of current period</td>
+                         <td className="py-5 px-4 sm:px-6 text-right font-mono font-bold text-slate-900 text-[13px] sm:text-sm">{formatCurrency(totals.currentVatDue)}</td>
                        </tr>
                        <tr className="border-b border-slate-100 hover:bg-slate-50/50">
-                         <td className="py-5 px-6 text-sm font-semibold text-slate-700">VAT Credit carried from previous period</td>
-                         <td className="py-5 px-6 text-right">
+                         <td className="py-5 px-4 sm:px-6 text-[13px] sm:text-sm font-semibold text-slate-700">VAT Credit B/F previous period</td>
+                         <td className="py-5 px-4 sm:px-6 text-right">
                            <input 
                              type="number" 
                              value={data.vatCreditCarried === 0 ? '' : data.vatCreditCarried}
                              onChange={(e) => setData({...data, vatCreditCarried: parseFloat(e.target.value) || 0})}
-                             className="w-32 text-right bg-slate-50 focus:bg-white border focus:ring-1 focus:ring-blue-100 px-3 py-2 rounded-xl font-mono text-sm font-bold"
+                             className="w-24 sm:w-32 text-right bg-slate-50 focus:bg-white border focus:ring-1 focus:ring-blue-100 px-2 sm:px-3 py-2 rounded-xl font-mono text-[13px] sm:text-sm font-bold"
                              placeholder="0.00"
                            />
                          </td>
                        </tr>
                        <tr className="border-b border-slate-100 hover:bg-slate-50/50">
-                         <td className="py-5 px-6 text-sm font-semibold text-slate-700">Corrections for previous period (-5000 to 5000)</td>
-                         <td className="py-5 px-6 text-right">
+                         <td className="py-5 px-4 sm:px-6 text-[13px] sm:text-sm font-semibold text-slate-700">Corrections (-5k to 5k)</td>
+                         <td className="py-5 px-4 sm:px-6 text-right">
                            <input 
                              type="number" 
                              value={data.corrections === 0 ? '' : data.corrections}
                              onChange={(e) => setData({...data, corrections: parseFloat(e.target.value) || 0})}
-                             className="w-32 text-right bg-slate-50 focus:bg-white border focus:ring-1 focus:ring-blue-100 px-3 py-2 rounded-xl font-mono text-sm font-bold"
+                             className="w-24 sm:w-32 text-right bg-slate-50 focus:bg-white border focus:ring-1 focus:ring-blue-100 px-2 sm:px-3 py-2 rounded-xl font-mono text-[13px] sm:text-sm font-bold"
                              placeholder="0.00"
                            />
                          </td>
                        </tr>
                        <tr className="bg-slate-900 text-white">
-                         <td className="py-8 px-6 text-sm font-bold uppercase tracking-[0.2em] text-slate-400">Net VAT Due</td>
-                         <td className={`py-8 px-6 text-right text-3xl font-mono font-black ${totals.netVatDue >= 0 ? 'text-blue-400' : 'text-emerald-400'}`}>
+                         <td className="py-6 sm:py-8 px-4 sm:px-6 text-[12px] sm:text-sm font-bold uppercase tracking-[0.1em] sm:tracking-[0.2em] text-slate-400">Net VAT Due</td>
+                         <td className={`py-6 sm:py-8 px-4 sm:px-6 text-right text-xl sm:text-3xl font-mono font-black ${totals.netVatDue >= 0 ? 'text-blue-400' : 'text-emerald-400'}`}>
                            {formatCurrency(totals.netVatDue)}
                          </td>
                        </tr>
@@ -1104,20 +1133,20 @@ export default function App() {
         </main>
 
         {/* Global Stats Footer */}
-        <footer className="bg-white border-t border-slate-200 flex justify-around py-4 px-6 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)] md:rounded-b-[2rem]">
-           <div className="text-center group">
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Output VAT</p>
-             <p className="text-sm font-mono font-bold text-blue-600">{formatCurrency(totals.salesVatDue)}</p>
+        <footer className="bg-white border-t border-slate-200 flex justify-around py-4 px-3 sm:px-6 z-40 shadow-[0_-10px_20px_rgba(0,0,0,0.02)] md:rounded-b-[2rem]">
+           <div className="text-center group flex-1">
+             <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tight">Output VAT</p>
+             <p className="text-[12px] sm:text-sm font-mono font-bold text-blue-600">{formatCurrency(totals.salesVatDue)}</p>
            </div>
            <div className="w-px h-8 bg-slate-100 self-center" />
-           <div className="text-center group">
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Input VAT</p>
-             <p className="text-sm font-mono font-bold text-emerald-600">{formatCurrency(totals.purchaseVatPaid)}</p>
+           <div className="text-center group flex-1">
+             <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tight">Input VAT</p>
+             <p className="text-[12px] sm:text-sm font-mono font-bold text-emerald-600">{formatCurrency(totals.purchaseVatPaid)}</p>
            </div>
            <div className="w-px h-8 bg-slate-100 self-center" />
-           <div className="text-center group">
-             <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">Net Balance</p>
-             <p className={`text-sm font-mono font-bold ${totals.netVatDue >= 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+           <div className="text-center group flex-1">
+             <p className="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-tight">Net Bal</p>
+             <p className={`text-[12px] sm:text-sm font-mono font-bold ${totals.netVatDue >= 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                {formatCurrency(totals.netVatDue)}
              </p>
            </div>

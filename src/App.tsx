@@ -322,7 +322,7 @@ export default function App() {
 
         const ai = new GoogleGenAI({ apiKey });
         const response = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
+          model: "gemini-1.5-flash",
           contents: {
             parts: [
               {
@@ -333,35 +333,41 @@ export default function App() {
               },
               {
                 text: `You are an expert KSA VAT Auditor specialized in ZATCA (GAZT) bilingual tax returns. 
-                Carefully analyze the provided Official VAT Return PDF (Arabic and English).
+                Extract the following data from the provided VAT Return PDF. 
                 
-                Extract precisely:
-                1. Metadata:
-                   - companyName (اسم المكلف)
-                   - taxNumber (رقم التسجيل الضريبي - 15 digits)
-                   - quarter (الفترة الضريبية)
-                   - fromDate (من تاريخ)
-                   - toDate (إلى تاريخ)
+                The form has two main sections:
+                SECTION 1: VAT ON SALES (Items 1-6)
+                SECTION 2: VAT ON PURCHASES (Items 7-12)
                 
-                2. VAT on Sales (VAT ON SALES / ضريبة القيمة المضافة على المبيعات):
-                   - Standard rated sales at 15% (المبيعات الخاضعة للنسبة الأساسية ١٥%): Extract 'Amount (SAR)' as salesVatAmount and 'Adjustment (SAR)' as salesVatAdjustment.
-                   - Zero rated domestic sales (المبيعات المحلية الخاضعة لنسبة الصفر): Extract 'Amount (SAR)' as salesZeroAmount and 'Adjustment (SAR)' as salesZeroAdjustment.
-                   - Exempt sales (المبيعات المعفاة): Extract 'Amount (SAR)' as salesExemptAmount and 'Adjustment (SAR)' as salesExemptAdjustment.
+                Extract:
+                - companyName: The name of the taxpayer/company (Arabic or English).
+                - taxNumber: The 15-digit VAT registration number.
+                - quarter: The tax period (e.g. Quarter 4, 2024).
+                - fromDate: Start date of period (DD-MM-YYYY).
+                - toDate: End date of period (DD-MM-YYYY).
                 
-                3. VAT on Purchases (VAT ON PURCHASES / ضريبة القيمة المضافة على المشتريات):
-                   - Standard rated domestic purchases (المشتريات المحلية بالضريبة الأساسية): Extract 'Amount (SAR)' as purchaseVatAmount and 'Adjustment (SAR)' as purchaseVatAdjustment.
-                   - Zero rated domestic purchases (المشتريات المحلية بالضريبة الصفرية): Extract 'Amount (SAR)' as purchaseZeroAmount and 'Adjustment (SAR)' as purchaseZeroAdjustment.
-                   - Exempt domestic purchases (المشتريات المحلية المعفاة): Extract 'Amount (SAR)' as purchaseExemptAmount and 'Adjustment (SAR)' as purchaseExemptAdjustment.
+                Sales Table (Table items 1-6):
+                - salesVatAmount: Amount from "Standard rated sales at 15%" (item 1).
+                - salesVatAdjustment: Adjustment from "Standard rated sales at 15%" (item 1).
+                - salesZeroAmount: Amount from "Zero rated domestic sales" or "Exports" (items 3-4).
+                - salesZeroAdjustment: Adjustment from items 3-4.
+                - salesExemptAmount: Amount from "Exempt sales" (item 5).
+                - salesExemptAdjustment: Adjustment from item 5.
                 
-                4. Other:
-                   - Tax payments in manual journal entries (ضريبة القيمة المضافة المدفوعة في قيود اليومية): Extract as journalVat.
-                   - VAT Credit carried forward from previous period (রصيد ضريبة القيمة المضافة المرحل من الفترة السابقة): Extract as vatCreditCarried.
-                   - Net corrections from previous period (صافي التصحيحات من الفترات السابقة): Extract as corrections.
+                Purchases Table (Table items 7-12):
+                - purchaseVatAmount: Sum of amounts from "Standard rated domestic purchases at 15%" and any Imports (items 7-9).
+                - purchaseVatAdjustment: Sum of adjustments from items 7-9.
+                - purchaseZeroAmount: Amount from "Zero rated purchases" (item 10).
+                - purchaseZeroAdjustment: Adjustment from item 10.
+                - purchaseExemptAmount: Amount from "Exempt purchases" (item 11).
+                - purchaseExemptAdjustment: Adjustment from item 11.
                 
-                CRITICAL:
-                - If a value is 0.00 or not found, use 0.
-                - Strip SAR and commas.
-                - ZATCA forms often list Sales (Items 1-6) first, then Purchases (Items 7-12). Check both.`
+                Others:
+                - journalVat: Any "VAT Paid" or manual journal adjustments.
+                - vatCreditCarried: "VAT Credit carried forward from previous period".
+                - corrections: Total of "Corrections from previous period".
+                
+                Return exactly this JSON structure. Convert all SAR values to numbers. If a value is missing or 0.00, return 0.`
               }
             ]
           },
@@ -375,28 +381,23 @@ export default function App() {
                 quarter: { type: Type.STRING },
                 fromDate: { type: Type.STRING },
                 toDate: { type: Type.STRING },
-                
                 salesVatAmount: { type: Type.NUMBER },
                 salesVatAdjustment: { type: Type.NUMBER },
                 salesZeroAmount: { type: Type.NUMBER },
                 salesZeroAdjustment: { type: Type.NUMBER },
                 salesExemptAmount: { type: Type.NUMBER },
                 salesExemptAdjustment: { type: Type.NUMBER },
-                
                 purchaseVatAmount: { type: Type.NUMBER },
                 purchaseVatAdjustment: { type: Type.NUMBER },
                 purchaseZeroAmount: { type: Type.NUMBER },
                 purchaseZeroAdjustment: { type: Type.NUMBER },
                 purchaseExemptAmount: { type: Type.NUMBER },
                 purchaseExemptAdjustment: { type: Type.NUMBER },
-                
                 journalVat: { type: Type.NUMBER },
                 vatCreditCarried: { type: Type.NUMBER },
                 corrections: { type: Type.NUMBER },
               },
-              required: [
-                "companyName", "taxNumber"
-              ]
+              required: ["companyName", "taxNumber"]
             }
           }
         });

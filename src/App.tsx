@@ -643,10 +643,11 @@ export default function App() {
           <div className="flex items-center gap-1 sm:gap-2">
             <button 
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all"
+              className="px-3 py-2 text-blue-600 hover:bg-blue-50 rounded-xl transition-all flex items-center gap-2 group"
               title="Import PDF"
             >
               <Upload size={20} />
+              <span className="text-xs font-bold hidden sm:inline">Import Report</span>
             </button>
             <button 
               onClick={clearAll}
@@ -697,7 +698,7 @@ export default function App() {
         </nav>
 
         {/* Dynamic Content Area */}
-        <main className="flex-1 p-6 pb-24 overflow-y-auto">
+        <main className="flex-1 p-4 sm:p-6 pb-8 sm:pb-12 overflow-y-auto">
           <AnimatePresence mode="wait">
             {activeTab === 'overview' && (
               <motion.div 

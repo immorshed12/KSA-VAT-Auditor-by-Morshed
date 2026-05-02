@@ -17,7 +17,10 @@ import {
   XCircle,
   Save,
   GitCompare,
-  History
+  History,
+  MoreVertical,
+  Search,
+  Filter
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { GoogleGenAI, Type } from "@google/genai";
@@ -1016,44 +1019,93 @@ export default function App() {
                 )}
 
                 <div className="space-y-4">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400 ml-1 flex items-center gap-2">
-                    <History size={14} />
-                    Saved Drafts ({drafts.length})
-                  </h3>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 ml-1">
+                    <h3 className="text-xs font-black uppercase tracking-widest text-slate-700 flex items-center gap-2">
+                      <History size={16} />
+                      Saved Drafts ({drafts.length})
+                    </h3>
+                    <div className="flex items-center gap-2">
+                      <div className="relative group">
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                        <input 
+                          type="text" 
+                          placeholder="Search drafts..." 
+                          className="pl-9 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 transition-all w-full sm:w-48 outline-none"
+                        />
+                      </div>
+                      <button className="flex items-center gap-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 transition-all">
+                        <Filter size={14} />
+                        All Quarters
+                      </button>
+                    </div>
+                  </div>
+
                   {drafts.length === 0 ? (
                     <div className="bg-white border-2 border-dashed border-slate-200 rounded-3xl p-12 text-center">
                        <Database size={32} className="mx-auto text-slate-200 mb-4" />
                        <p className="text-sm font-bold text-slate-400">No drafts saved yet. Save reports from the Result lab.</p>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {drafts.map(draft => (
-                        <div key={draft.id} className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-indigo-200 hover:shadow-md transition-all group">
-                           <div className="flex justify-between items-start mb-4">
-                              <div>
-                                <p className="font-bold text-slate-800">{draft.name}</p>
-                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">{new Date(draft.timestamp).toLocaleString()}</p>
-                              </div>
-                              <button onClick={() => deleteDraft(draft.id)} className="text-slate-300 hover:text-red-500 transition-colors">
-                                <Trash2 size={16} />
-                              </button>
+                    <div className="bg-slate-50/50 border border-slate-200 rounded-[2rem] p-2 space-y-1">
+                      {drafts.map((draft, idx) => (
+                        <div 
+                          key={draft.id} 
+                          className="bg-white hover:bg-blue-50/30 border border-transparent hover:border-blue-100 rounded-2xl p-4 sm:p-5 transition-all group flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6"
+                        >
+                           <div className={`p-3 rounded-xl ${idx === 0 ? 'bg-blue-50 text-blue-600' : 'bg-slate-50 text-slate-400'} group-hover:bg-blue-100 transition-colors`}>
+                              <FileText size={24} />
                            </div>
-                           <div className="flex gap-2">
-                              <button 
-                                onClick={() => loadDraft(draft)}
-                                className="flex-1 bg-slate-50 hover:bg-slate-100 text-slate-600 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
-                              >
-                                Load
-                              </button>
-                              <button 
-                                onClick={() => {
-                                  setCompareIds([compareIds?.[0] || 'current', draft.id]);
-                                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                                }}
-                                className="flex-1 border border-indigo-100 text-indigo-600 hover:bg-indigo-50 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all"
-                              >
-                                Compare
-                              </button>
+                           
+                           <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="font-bold text-slate-900 truncate">
+                                  {draft.quarter || 'Untitled Quarter'} {draft.companyName ? `- ${draft.companyName}` : ''}
+                                  {idx === 0 && <span className="ml-2 text-slate-400 text-xs font-medium">(Current)</span>}
+                                </p>
+                                <span className="px-2 py-0.5 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-md whitespace-nowrap">
+                                  {draft.quarter?.split(',')[0] || 'Q?'}
+                                </span>
+                              </div>
+                              <div className="flex flex-wrap items-center gap-y-1 gap-x-4">
+                                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-tight">Draft {new Date(draft.timestamp).toLocaleDateString()} {new Date(draft.timestamp).toLocaleTimeString()}</p>
+                                <div className="flex items-center gap-1 text-[10px] text-slate-500 font-bold">
+                                  <Calendar size={12} className="text-slate-400" />
+                                  {draft.fromDate || 'N/A'} - {draft.toDate || 'N/A'}
+                                </div>
+                              </div>
+                           </div>
+
+                           <div className="flex items-center gap-4 w-full sm:w-auto">
+                              <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${idx === 0 ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'}`}>
+                                {idx === 0 ? 'Active Session' : 'Completed'}
+                              </span>
+                              
+                              <div className="flex items-center gap-2 flex-1 sm:flex-none">
+                                <button 
+                                  onClick={() => loadDraft(draft)}
+                                  className="flex-1 sm:flex-none px-5 py-2 bg-white border border-blue-200 text-blue-600 hover:bg-blue-50 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-sm"
+                                >
+                                  Load
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    setCompareIds([compareIds?.[0] || 'current', draft.id]);
+                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                  }}
+                                  className="flex-1 sm:flex-none px-5 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-md shadow-blue-500/20"
+                                >
+                                  Compare
+                                </button>
+                                <button 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if(window.confirm("Delete this draft?")) deleteDraft(draft.id);
+                                  }}
+                                  className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                >
+                                  <MoreVertical size={16} />
+                                </button>
+                              </div>
                            </div>
                         </div>
                       ))}
